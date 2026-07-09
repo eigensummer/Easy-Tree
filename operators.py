@@ -31,6 +31,13 @@ def get_addon_filepath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+def set_modifier_input_value(mod, name, value):
+    if bpy.app.version >= (5, 2, 0):
+        getattr(mod.properties.inputs, SOCKET[name]).value = value
+    else:
+        mod[SOCKET[name]] = value
+
+
 class EASYTREE_OT_HideLeavesTool(bpy.types.Operator):
     bl_idname = "object.hide_tree_leaves"
     bl_label = "Hide Leaves"
@@ -44,7 +51,7 @@ class EASYTREE_OT_HideLeavesTool(bpy.types.Operator):
             for mod in obj.modifiers:
                 if mod.type == 'NODES' and mod.node_group == bpy.data.node_groups["Simple Tree Generator"]:
                     #print(mod)
-                    mod[SOCKET["showLeaves"]] = False
+                    set_modifier_input_value(mod, "showLeaves", False)
                     obj.update_tag()
         bpy.context.view_layer.update()
         
@@ -68,7 +75,7 @@ class EASYTREE_OT_ShowLeavesTool(bpy.types.Operator):
             for mod in obj.modifiers:
                 if mod.type == 'NODES' and mod.node_group == bpy.data.node_groups["Simple Tree Generator"]:
                     #print(mod)
-                    mod[SOCKET["showLeaves"]] = True
+                    set_modifier_input_value(mod, "showLeaves", True)
                     obj.update_tag()
         bpy.context.view_layer.update()
         
@@ -94,7 +101,7 @@ class EASYTREE_OT_AddTreeTool(bpy.types.Operator):
             self.report({'ERROR'}, f"Asset .blend file not found: {filepath}. Please ensure it exists in the 'assets' subfolder of the add-on.")
             return {'CANCELLED'}
 
-        bpy.ops.mesh.primitive_cube_add(location=bpy.context.scene.cursor.location)
+        bpy.ops.mesh.primitive_cube_add(location=bpy.context.scene.cursor.location, enter_editmode=False)
         obj = bpy.context.active_object
         obj.name = "Tree"
         
@@ -123,49 +130,49 @@ class EASYTREE_OT_AddTreeTool(bpy.types.Operator):
     
         #Tall
         if context.scene.tree_preset == 'TALL':
-            mod[SOCKET["trunk"]] = 5
-            mod[SOCKET["numLevels"]] = 5
-            mod[SOCKET["bLength"]] = 8
-            mod[SOCKET["rAngle"]] = 0.698
-            mod[SOCKET["thickness"]] = 3.0
+            set_modifier_input_value(mod, "trunk", 5)
+            set_modifier_input_value(mod, "numLevels", 5)
+            set_modifier_input_value(mod, "bLength", 8)
+            set_modifier_input_value(mod, "rAngle", 0.698)
+            set_modifier_input_value(mod, "thickness", 3.0)
             
         elif context.scene.tree_preset == 'THIN':
-            mod[SOCKET["trunk"]] = 2
-            mod[SOCKET["treetop"]] = 5
-            mod[SOCKET["numLevels"]] = 4
-            mod[SOCKET["bLength"]] = 6
-            mod[SOCKET["rAngle"]] = 0.523
-            mod[SOCKET["thickness"]] = 1.8
-            mod[SOCKET["minHeight"]] = 5
+            set_modifier_input_value(mod, "trunk", 2)
+            set_modifier_input_value(mod, "treetop", 5)
+            set_modifier_input_value(mod, "numLevels", 4)
+            set_modifier_input_value(mod, "bLength", 6)
+            set_modifier_input_value(mod, "rAngle", 0.523)
+            set_modifier_input_value(mod, "thickness", 1.8)
+            set_modifier_input_value(mod, "minHeight", 5)
         
         elif context.scene.tree_preset == 'DEAD':
-            mod[SOCKET["twoOrThree"]] = 1#'Three Branches'
-            mod[SOCKET["trunk"]] = 1
-            mod[SOCKET["numLevels"]] = 4
-            mod[SOCKET["bLength"]] = 10
-            mod[SOCKET["rAngle"]] = 0.41
-            mod[SOCKET["rJitter"]] = 0.25
-            mod[SOCKET["gravity"]] = 1.7
-            mod[SOCKET["thickness"]] = 1.8
-            mod[SOCKET["addLeaves"]] = False
+            set_modifier_input_value(mod, "twoOrThree", "Three Branches")
+            set_modifier_input_value(mod, "trunk", 1)
+            set_modifier_input_value(mod, "numLevels", 4)
+            set_modifier_input_value(mod, "bLength", 10)
+            set_modifier_input_value(mod, "rAngle", 0.41)
+            set_modifier_input_value(mod, "rJitter", 0.25)
+            set_modifier_input_value(mod, "gravity", 1.7)
+            set_modifier_input_value(mod, "thickness", 1.8)
+            set_modifier_input_value(mod, "addLeaves", False)
             
         elif context.scene.tree_preset == 'LARGE':
-            mod[SOCKET["trunk"]] = 2
-            mod[SOCKET["treetop"]] = 2
-            mod[SOCKET["numLevels"]] = 6
-            mod[SOCKET["bLength"]] = 8
-            mod[SOCKET["rAngle"]] = 0.488
-            mod[SOCKET["thickness"]] = 2.9
+            set_modifier_input_value(mod, "trunk", 2)
+            set_modifier_input_value(mod, "treetop", 2)
+            set_modifier_input_value(mod, "numLevels", 6)
+            set_modifier_input_value(mod, "bLength", 8)
+            set_modifier_input_value(mod, "rAngle", 0.488)
+            set_modifier_input_value(mod, "thickness", 2.9)
             
             
         if context.scene.season == 'SPRING':
-            mod[SOCKET["season"]] = 0.0
+            set_modifier_input_value(mod, "season", 0.0)
         elif context.scene.season == 'SUMMER':
-            mod[SOCKET["season"]] = 0.5
+            set_modifier_input_value(mod, "season", 0.5)
         else:
-            mod[SOCKET["season"]] = 1.0
+            set_modifier_input_value(mod, "season", 1.0)
         
-        mod[SOCKET["seed"]] = random.randint(0, 9000)
+        set_modifier_input_value(mod, "seed", random.randint(0, 9000))
         
         
         self.report({'INFO'}, f"Added {obj.name}!")
